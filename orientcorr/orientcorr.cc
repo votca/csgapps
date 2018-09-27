@@ -183,7 +183,7 @@ void MyWorker::EvalConfiguration(Topology *top, Topology *top_ref) {
             v.normalize();
             b->setPos(pos);
             b->setV(v);
-            mol->AddBead(b, "A");
+            mol->AddBead(b);
         }
     }
     cout << "done\n";
