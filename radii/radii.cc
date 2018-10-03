@@ -102,15 +102,15 @@ void CsgTestApp::EvalConfiguration(Topology *top, Topology *top_ref)
         double M=0;
         vec cm(0,0,0);
         for(int i=0; i<N; ++i) {
-            M+=mol->getBead(i)->getM();
-            cm+=mol->getBead(i)->getPos()*mol->getBead(i)->getM();
+            M+=mol->getBead(i)->getMass();
+            cm+=mol->getBead(i)->getPos()*mol->getBead(i)->getMass();
         }
         cm/=M;
         // now tensor of gyration based on cm
 	double r_gyr_m_sq=0;
         for(int i=0; i<N; ++i) {
             vec r_ij=mol->getBead(i)->getPos() - cm;
-            r_gyr_m_sq+=mol->getBead(i)->getM()*(r_ij*r_ij);
+            r_gyr_m_sq+=mol->getBead(i)->getMass()*(r_ij*r_ij);
         }
         r_gyr_m_sq/=M;
 
