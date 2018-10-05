@@ -174,8 +174,8 @@ void MyWorker::EvalConfiguration(Topology *top, Topology *top_ref) {
         for(int i=0; i<mol_src->BeadCount()-1; ++i) {
             // create a bead in mapped topology
             Bead *b = mapped.CreateBead(3, "A", mapped.GetOrCreateBeadType("A"), 1, 0.0, 0.0);
-            vec p1 = mol_src->getBead(i)->getPos();
-            vec p2 = mol_src->getBead(i+1)->getPos();
+            vec p1 = mol_src->getBead<Bead *>(i)->getPos();
+            vec p2 = mol_src->getBead<Bead *>(i+1)->getPos();
             // position is in middle of bond
             vec pos = 0.5*(p1 + p2);
             // orientation pointing along bond

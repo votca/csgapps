@@ -85,7 +85,7 @@ void CsgTestApp::EvalConfiguration(Topology *top, Topology *top_ref)
         for(int i=0; i<N; ++i) {
             for(int j=i+1; j<N; ++j) {
                 // distance between bead i and j
-                vec r_ij = mol->getBead(i)->getPos() -  mol->getBead(j)->getPos();
+                vec r_ij = mol->getBead<Bead *>(i)->getPos() -  mol->getBead<Bead *>(j)->getPos();
                 // radius of gyration squared
                 r_gyr_sq += r_ij*r_ij/(double)(N*N);
                 // hydrodynamic radius
@@ -102,15 +102,15 @@ void CsgTestApp::EvalConfiguration(Topology *top, Topology *top_ref)
         double M=0;
         vec cm(0,0,0);
         for(int i=0; i<N; ++i) {
-            M+=mol->getBead(i)->getMass();
-            cm+=mol->getBead(i)->getPos()*mol->getBead(i)->getMass();
+            M+=mol->getBead<Bead *>(i)->getMass();
+            cm+=mol->getBead<Bead *>(i)->getPos()*mol->getBead<Bead *>(i)->getMass();
         }
         cm/=M;
         // now tensor of gyration based on cm
 	double r_gyr_m_sq=0;
         for(int i=0; i<N; ++i) {
-            vec r_ij=mol->getBead(i)->getPos() - cm;
-            r_gyr_m_sq+=mol->getBead(i)->getMass()*(r_ij*r_ij);
+            vec r_ij=mol->getBead<Bead *>(i)->getPos() - cm;
+            r_gyr_m_sq+=mol->getBead<Bead *>(i)->getMass()*(r_ij*r_ij);
         }
         r_gyr_m_sq/=M;
 
