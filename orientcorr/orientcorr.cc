@@ -16,14 +16,19 @@
  */      
 
 #include <stdlib.h>
+
+#include <votca/tools/types.h>
 #include <votca/csg/csgapplication.h>
 #include <votca/tools/histogramnew.h>
 #include <votca/csg/beadlist.h>
+#include <votca/csg/topology.h>
+#include <votca/csg/molecule.h>
 #include <votca/csg/nblist.h>
 #include <votca/csg/nblistgrid.h>
 
 using namespace std;
 using namespace votca::csg;
+using namespace votca::tools;
 
 class OrientCorrApp
 : public CsgApplication {
@@ -170,17 +175,24 @@ void MyWorker::EvalConfiguration(Topology *top, Topology *top_ref) {
         Molecule *mol_src = *iter;
         // create a molecule in mapped topology
         Molecule *mol = mapped.CreateMolecule(mol_src->getName());
-        // loop over beads in molecule
+        string molecule_name = mol->getName();
         vector<int> bead_ids = mol_src->getBeadIds();
+        byte_t bead_symmetry = 3;
+        string bead_type = "A";
+        string bead_name = "A";
+        int residue_number = 1;
+        // loop over beads in molecule
         for( int index = 0; index<(static_cast<int>(bead_ids.size())-1);++index){ 
             // create a bead in mapped topology
             int bead_id1 = bead_ids.at(index);
             int bead_id2 = bead_ids.at(index+1);
-            string bead_type = "A";
+            string residue_name = mol_src->getBead(bead_id1)->getResidueName();
             if(mapped.BeadTypeExist(bead_type)==false){
               mapped.RegisterBeadType(bead_type);
             }
-            Bead *b = mapped.CreateBead(3, "A", bead_type, 1, 0.0, 0.0);
+            Bead *b = mapped.CreateBead<Bead>(bead_symmetry, bead_name, 
+                bead_type,residue_number,residue_name,molecule_name, 0.0, 0.0);
+
             vec p1 = mol_src->getBead(bead_id1)->getPos();
             vec p2 = mol_src->getBead(bead_id2)->getPos();
             // position is in middle of bond
@@ -190,7 +202,7 @@ void MyWorker::EvalConfiguration(Topology *top, Topology *top_ref) {
             v.normalize();
             b->setPos(pos);
             b->setV(v);
-            mol->AddBead(b, "A");
+            mol->AddBead(b);
         }
     }
     cout << "done\n";
@@ -227,7 +239,7 @@ bool MyWorker::FoundPair(Bead *b1, Bead *b2, const vec &r, const double dist)
     _cor.Process(dist, P2);
     _count.Process(dist);
 
-    if(b1->getMolecule() == b2->getMolecule())
+    if(b1->getMoleculeId() == b2->getMoleculeId())
         return false;
 
     // calculate average with excluding intramolecular contributions
