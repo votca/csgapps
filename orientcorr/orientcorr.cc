@@ -171,15 +171,18 @@ void MyWorker::EvalConfiguration(Topology *top, Topology *top_ref) {
         // create a molecule in mapped topology
         Molecule *mol = mapped.CreateMolecule(mol_src->getName());
         // loop over beads in molecule
-        for(int i=0; i<mol_src->BeadCount()-1; ++i) {
+        vector<int> bead_ids = mol_src->getBeadIds();
+        for( int index = 0; index<(static_cast<int>(bead_ids.size())-1);++index){ 
             // create a bead in mapped topology
+            int bead_id1 = bead_ids.at(index);
+            int bead_id2 = bead_ids.at(index+1);
             string bead_type = "A";
             if(mapped.BeadTypeExist(bead_type)==false){
               mapped.RegisterBeadType(bead_type);
             }
             Bead *b = mapped.CreateBead(3, "A", bead_type, 1, 0.0, 0.0);
-            vec p1 = mol_src->getBead(i)->getPos();
-            vec p2 = mol_src->getBead(i+1)->getPos();
+            vec p1 = mol_src->getBead(bead_id1)->getPos();
+            vec p2 = mol_src->getBead(bead_id2)->getPos();
             // position is in middle of bond
             vec pos = 0.5*(p1 + p2);
             // orientation pointing along bond
