@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2018 The VOTCA Development Team (http://www.votca.org)
+ * Copyright 2009-2019 The VOTCA Development Team (http://www.votca.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,17 @@
  *
  */
 
+#include <iostream>
 #include <stdlib.h>
 
-#include <votca/tools/types.h>
-#include <votca/csg/csgapplication.h>
-#include <votca/tools/histogramnew.h>
 #include <votca/csg/beadlist.h>
-#include <votca/csg/topology.h>
+#include <votca/csg/csgapplication.h>
 #include <votca/csg/molecule.h>
 #include <votca/csg/nblist.h>
 #include <votca/csg/nblistgrid.h>
+#include <votca/csg/topology.h>
 #include <votca/tools/histogramnew.h>
+#include <votca/tools/types.h>
 
 using namespace std;
 using namespace votca::csg;
@@ -157,50 +157,51 @@ CsgApplication::Worker *OrientCorrApp::ForkWorker() {
 // evaluates a frame
 void MyWorker::EvalConfiguration(Topology *top, Topology *top_ref) {
 
-    // first genearate a mapped topology
-    // the beads are sitting on the bonds and have an orientation which
-    // is pointing along bond direction
-    Topology mapped;
-    cout << "generating mapped topology...";
-    
-    // copy box size
-    mapped.setBox(top->getBox());
+  // first genearate a mapped topology
+  // the beads are sitting on the bonds and have an orientation which
+  // is pointing along bond direction
+  Topology mapped;
+  cout << "generating mapped topology...";
 
-    // loop over all molecules
-    for(MoleculeContainer::iterator iter = top->Molecules().begin();
-        iter != top->Molecules().end(); ++iter) {
-        Molecule *mol_src = *iter;
-        // create a molecule in mapped topology
-        Molecule *mol = mapped.CreateMolecule(mol_src->getName());
-        string molecule_name = mol->getName();
-        vector<int> bead_ids = mol_src->getBeadIds();
-        byte_t bead_symmetry = 3;
-        string bead_type = "A";
-        string bead_name = "A";
-        int residue_number = 1;
-        // loop over beads in molecule
-        for( int index = 0; index<(static_cast<int>(bead_ids.size())-1);++index){ 
-            // create a bead in mapped topology
-            int bead_id1 = bead_ids.at(index);
-            int bead_id2 = bead_ids.at(index+1);
-            string residue_name = mol_src->getBead(bead_id1)->getResidueName();
-            if(mapped.BeadTypeExist(bead_type)==false){
-              mapped.RegisterBeadType(bead_type);
-            }
-            Bead *b = mapped.CreateBead<Bead>(bead_symmetry, bead_name, 
-                bead_type,residue_number,residue_name,molecule_name, 0.0, 0.0);
+  // copy box size
+  mapped.setBox(top->getBox());
 
-            vec p1 = mol_src->getBead(bead_id1)->getPos();
-            vec p2 = mol_src->getBead(bead_id2)->getPos();
-            // position is in middle of bond
-            vec pos = 0.5*(p1 + p2);
-            // orientation pointing along bond
-            vec v = p2 - p1;
-            v.normalize();
-            b->setPos(pos);
-            b->setV(v);
-            mol->AddBead(b);
-        }
+  // loop over all molecules
+  for (MoleculeContainer::iterator iter = top->Molecules().begin();
+       iter != top->Molecules().end(); ++iter) {
+    Molecule *mol_src = *iter;
+    // create a molecule in mapped topology
+    Molecule *mol = mapped.CreateMolecule(mol_src->getName());
+    string molecule_name = mol->getName();
+    vector<int> bead_ids = mol_src->getBeadIds();
+    byte_t bead_symmetry = 3;
+    string bead_type = "A";
+    string bead_name = "A";
+    int residue_number = 1;
+    // loop over beads in molecule
+    for (int index = 0; index < (static_cast<int>(bead_ids.size()) - 1);
+         ++index) {
+      // create a bead in mapped topology
+      int bead_id1 = bead_ids.at(index);
+      int bead_id2 = bead_ids.at(index + 1);
+      string residue_name = mol_src->getBead(bead_id1)->getResidueName();
+      if (mapped.BeadTypeExist(bead_type) == false) {
+        mapped.RegisterBeadType(bead_type);
+      }
+      Bead *b = mapped.CreateBead<Bead>(bead_symmetry, bead_name, bead_type,
+                                        residue_number, residue_name,
+                                        molecule_name, 0.0, 0.0);
+
+      vec p1 = mol_src->getBead(bead_id1)->getPos();
+      vec p2 = mol_src->getBead(bead_id2)->getPos();
+      // position is in middle of bond
+      vec pos = 0.5 * (p1 + p2);
+      // orientation pointing along bond
+      vec v = p2 - p1;
+      v.normalize();
+      b->setPos(pos);
+      b->setV(v);
+      mol->AddBead(b);
     }
   }
   cout << "done\n";
@@ -236,8 +237,7 @@ bool MyWorker::FoundPair(Bead *b1, Bead *b2, const vec &r, const double dist) {
   _cor.Process(dist, P2);
   _count.Process(dist);
 
-    if(b1->getMoleculeId() == b2->getMoleculeId())
-        return false;
+  if (b1->getMoleculeId() == b2->getMoleculeId()) return false;
 
   // calculate average with excluding intramolecular contributions
   _cor_excl.Process(dist, P2);
