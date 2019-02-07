@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 The VOTCA Development Team (http://www.votca.org)
+ * Copyright 2009-2019 The VOTCA Development Team (http://www.votca.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -173,9 +173,10 @@ int main(int argc, char **argv) {
     } else {
       // Include all particle types
       for (mol = top.Molecules().begin(); mol != top.Molecules().end(); ++mol) {
-        for (int i = 0; i < (*mol)->BeadCount(); ++i) {
+        vector<int> bead_ids = (*mol)->getBeadIds();
+        for (const int &bead_id : bead_ids) {
           flag_found = 0;
-          part_type = atoi((*mol)->getBead(i)->getType().c_str());
+          part_type = atoi((*mol)->getBead(bead_id)->getType().c_str());
           for (size_t j = 0; j < ptypes.size(); ++j) {
             if (part_type == ptypes[j]) flag_found = 1;
           }
@@ -194,8 +195,9 @@ int main(int argc, char **argv) {
     // ptypes)
     if (vm.count("shift_com")) {
       for (mol = top.Molecules().begin(); mol != top.Molecules().end(); ++mol) {
-        for (int i = 0; i < (*mol)->BeadCount(); ++i) {
-          part_type = atoi((*mol)->getBead(i)->getType().c_str());
+        vector<int> bead_ids = (*mol)->getBeadIds();
+        for (const int &bead_id : bead_ids) {
+          part_type = atoi((*mol)->getBead(bead_id)->getType().c_str());
           for (size_t j = 0; j < ptypes.size(); ++j)
             if (part_type == ptypes[j]) ++n_part;
         }
@@ -233,16 +235,17 @@ int main(int argc, char **argv) {
       if (vm.count("shift_com")) {
         for (mol = top.Molecules().begin(); mol != top.Molecules().end();
              ++mol) {
-          for (int i = 0; i < (*mol)->BeadCount(); ++i) {
-            part_type = atoi((*mol)->getBead(i)->getType().c_str());
+          vector<int> bead_ids = (*mol)->getBeadIds();
+          for (const int &bead_id : bead_ids) {
+            part_type = atoi((*mol)->getBead(bead_id)->getType().c_str());
             for (size_t j = 0; j < ptypes.size(); ++j) {
               if (part_type == ptypes[j]) {
                 if (coordinate.compare("x") == 0) {
-                  com += (*mol)->getBead(i)->getPos().getX();
+                  com += (*mol)->getBead(bead_id)->getPos().getX();
                 } else if (coordinate.compare("y") == 0) {
-                  com += (*mol)->getBead(i)->getPos().getY();
+                  com += (*mol)->getBead(bead_id)->getPos().getY();
                 } else {
-                  com += (*mol)->getBead(i)->getPos().getZ();
+                  com += (*mol)->getBead(bead_id)->getPos().getZ();
                 }
               }
             }
@@ -257,16 +260,17 @@ int main(int argc, char **argv) {
         // Loop over each atom property
         for (mol = top.Molecules().begin(); mol != top.Molecules().end();
              ++mol) {
-          for (int i = 0; i < (*mol)->BeadCount(); ++i) {
-            part_type = atoi((*mol)->getBead(i)->getType().c_str());
+          vector<int> bead_ids = (*mol)->getBeadIds();
+          for (const int &bead_id : bead_ids) {
+            part_type = atoi((*mol)->getBead(bead_id)->getType().c_str());
             for (size_t j = 0; j < ptypes.size(); ++j) {
               if (part_type == ptypes[j]) {
                 if (coordinate.compare("x") == 0)
-                  coord = (*mol)->getBead(i)->getPos().getX();
+                  coord = (*mol)->getBead(bead_id)->getPos().getX();
                 else if (coordinate.compare("y") == 0)
-                  coord = (*mol)->getBead(i)->getPos().getY();
+                  coord = (*mol)->getBead(bead_id)->getPos().getY();
                 else
-                  coord = (*mol)->getBead(i)->getPos().getZ();
+                  coord = (*mol)->getBead(bead_id)->getPos().getZ();
 
                 if (coord - com > min && coord - com < max)
                   ++p_occ[j][(int)floor((coord - com - min) / step)];
