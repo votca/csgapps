@@ -12,3 +12,5 @@ part_dist:        outputs the time-averaged number of particles, listed by parti
 partial_rdf:      calculates the rdf in a spherical subvolume 
 traj_force:       add/subtracts reference forces from a given trajectory and stores in a new trajectory
 To add your own program just create a new folder and put your *.cc files in there
+
+Codacy Badge
