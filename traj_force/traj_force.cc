@@ -52,7 +52,7 @@ bool TrajForce::EvaluateOptions() {
   return true;
 }
 
-void TrajForce::BeginEvaluate(Topology *top, Topology *top_atom) {
+void TrajForce::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom) {
   _top_force.CopyTopologyData(top);
   _trjreader_force =
       TrjReaderFactory().Create(_op_vm["trj-force"].as<string>());
@@ -83,7 +83,7 @@ void TrajForce::EndEvaluate() {
 
 void TrajForce::WriteOutFiles() {}
 
-void TrajForce::EvalConfiguration(Topology *conf, Topology *conf_atom) {
+void TrajForce::EvalConfiguration(CSG_Topology *conf, CSG_Topology *conf_atom) {
   if (conf->BeadCount() != _top_force.BeadCount())
     throw std::runtime_error(
         "number of beads in topology and reference force topology does not "

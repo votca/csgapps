@@ -40,7 +40,7 @@ class CsgTestApp : public CsgApplication {
   // write out results in EndEvaluate
   void EndEvaluate();
   // do calculation in this function
-  void EvalConfiguration(Topology *top, Topology *top_ref);
+  void EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref);
 
  protected:
   // inverse hydrodynamic radius average
@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
   return app.Exec(argc, argv);
 }
 
-void CsgTestApp::EvalConfiguration(Topology *top, Topology *top_ref) {
+void CsgTestApp::EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref) {
   // loop over all molecules
   for (MoleculeContainer::iterator imol = top->Molecules().begin();
        imol != top->Molecules().end(); ++imol) {

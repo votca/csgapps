@@ -45,11 +45,11 @@ class TrajForce : public CsgApplication {
   bool EvaluateOptions();
 
   /// \brief called before the first frame
-  void BeginEvaluate(Topology *top, Topology *top_atom);
+  void BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom);
   /// \brief called after the last frame
   void EndEvaluate();
   /// \brief called for each frame which is mapped
-  void EvalConfiguration(Topology *conf, Topology *conf_atom);
+  void EvalConfiguration(CSG_Topology *conf, CSG_Topology *conf_atom);
 
  protected:
   /// \brief Scaling of forces, +1 for addition and -1 for subtraction
@@ -58,7 +58,7 @@ class TrajForce : public CsgApplication {
   void WriteOutFiles();
 
   void OpenForcesTrajectory();
-  Topology _top_force;
+  CSG_Topology _top_force;
   TrajectoryReader *_trjreader_force;
   TrajectoryWriter *_trjwriter;
 };

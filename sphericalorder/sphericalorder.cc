@@ -71,7 +71,7 @@ class CGOrderParam : public CsgApplication {
   bool DoTrajectory() { return true; }
   bool DoMapping() { return true; }
 
-  void BeginEvaluate(Topology *top, Topology *top_atom) {
+  void BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom) {
 
     string filter;
 
@@ -173,7 +173,7 @@ class CGOrderParam : public CsgApplication {
     _file_w.close();
   };
 
-  void EvalConfiguration(Topology *conf, Topology *conf_atom = 0) {
+  void EvalConfiguration(CSG_Topology *conf, CSG_Topology *conf_atom = 0) {
 
     vec eR;
     int nu, nv, nw;

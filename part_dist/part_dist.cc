@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
   vector<int> ptypes;
   ifstream fl_ptypes;
   ofstream fl_out;
-  Topology top;
+  CSG_Topology top;
   TopologyReader *reader;
   TrajectoryReader *trajreader;
   int part_type, n_bins, first_frame(0), last_frame(-1), flag_found(0),

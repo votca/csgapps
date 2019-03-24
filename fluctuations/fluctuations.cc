@@ -77,7 +77,7 @@ class CsgFluctuations : public CsgApplication {
   bool DoTrajectory() { return true; }
   bool DoMapping() { return true; }
 
-  void BeginEvaluate(Topology *top, Topology *top_atom) {
+  void BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom) {
     _filter = OptionsMap()["filter"].as<string>();
     _refmol = OptionsMap()["refmol"].as<string>();
     _rmin = OptionsMap()["rmin"].as<double>();
@@ -141,7 +141,7 @@ class CsgFluctuations : public CsgApplication {
   // write out results in EndEvaluate
   void EndEvaluate();
   // do calculation in this function
-  void EvalConfiguration(Topology *top, Topology *top_ref);
+  void EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref);
 
  protected:
   // number of particles in dV
@@ -169,8 +169,8 @@ int main(int argc, char **argv) {
   return app.Exec(argc, argv);
 }
 
-void CsgFluctuations::EvalConfiguration(Topology *conf,
-                                        Topology *conf_atom = 0) {
+void CsgFluctuations::EvalConfiguration(CSG_Topology *conf,
+                                        CSG_Topology *conf_atom = 0) {
   vec eR;
   double r = 0;
   int rbin;

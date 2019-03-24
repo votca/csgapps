@@ -51,7 +51,7 @@ class OrientCorrApp : public CsgApplication {
   bool SynchronizeThreads() { return false; }
 
   // called before groing through all frames
-  void BeginEvaluate(Topology *top, Topology *top_ref);
+  void BeginEvaluate(CSG_Topology *top, CSG_Topology *top_ref);
   // called after all frames were parsed
   void EndEvaluate();
 
@@ -82,7 +82,7 @@ class MyWorker : public CsgApplication::Worker {
   ~MyWorker(){};
 
   // evaluate the current frame
-  void EvalConfiguration(Topology *top, Topology *top_ref);
+  void EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref);
 
   // callback if neighborsearch finds a pair
   bool FoundPair(Bead *b1, Bead *b2, const vec &r, const double dist);
@@ -129,7 +129,7 @@ NBList *OrientCorrApp::CreateNBSearch() {
 }
 
 // initialize the histograms
-void OrientCorrApp::BeginEvaluate(Topology *top, Topology *top_ref) {
+void OrientCorrApp::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_ref) {
   _cor.Initialize(0, _cut_off, _nbins);
   _count.Initialize(0, _cut_off, _nbins);
   _cor_excl.Initialize(0, _cut_off, _nbins);
@@ -149,12 +149,12 @@ CsgApplication::Worker *OrientCorrApp::ForkWorker() {
 }
 
 // evaluates a frame
-void MyWorker::EvalConfiguration(Topology *top, Topology *top_ref) {
+void MyWorker::EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref) {
 
   // first genearate a mapped topology
   // the beads are sitting on the bonds and have an orientation which
   // is pointing along bond direction
-  Topology mapped;
+  CSG_Topology mapped;
   cout << "generating mapped topology...";
 
   // copy box size

@@ -57,7 +57,7 @@ void RDFCalculator::Initialize() {
   }
 };
 
-void RDFCalculator::BeginEvaluate(Topology *top, Topology *top_atom) {
+void RDFCalculator::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom) {
   matrix box;
   box = top->getBox();
   vec a = box.getCol(0);
@@ -85,13 +85,13 @@ void RDFCalculator::BeginEvaluate(Topology *top, Topology *top_atom) {
     allbeads2.Generate(*top, (*iter)->get("type2").value());
 
     if (allbeads1.size() == 0)
-      throw std::runtime_error("Topology does not have beads of type \"" +
+      throw std::runtime_error("CSG_Topology does not have beads of type \"" +
                                (*iter)->get("type1").value() +
                                "\"\n"
                                "This was specified in type1 of interaction \"" +
                                name + "\"");
     if (allbeads2.size() == 0)
-      throw std::runtime_error("Topology does not have beads of type \"" +
+      throw std::runtime_error("CSG_Topology does not have beads of type \"" +
                                (*iter)->get("type2").value() +
                                "\"\n"
                                "This was specified in type2 of interaction \"" +
@@ -178,8 +178,8 @@ void RDFCalculator::LoadOptions(const string &file) {
 }
 
 // evaluate current conformation
-void RDFCalculator::Worker::EvalConfiguration(Topology *top,
-                                              Topology *top_atom) {
+void RDFCalculator::Worker::EvalConfiguration(CSG_Topology *top,
+                                              CSG_Topology *top_atom) {
   _cur_vol = 4.0 / 3.0 * M_PI * _rdfcalculator->_subvol_rad *
              _rdfcalculator->_subvol_rad * _rdfcalculator->_subvol_rad;
   // process non-bonded interactions
@@ -240,7 +240,7 @@ class IMCNBSearchHandler {
 };
 
 // process non-bonded interactions for current frame
-void RDFCalculator::Worker::DoNonbonded(Topology *top) {
+void RDFCalculator::Worker::DoNonbonded(CSG_Topology *top) {
   for (list<Property *>::iterator iter = _rdfcalculator->_nonbonded.begin();
        iter != _rdfcalculator->_nonbonded.end(); ++iter) {
     string name = (*iter)->get("name").value();
@@ -315,7 +315,7 @@ void RDFCalculator::Worker::DoNonbonded(Topology *top) {
 }
 
 // process non-bonded interactions for current frame
-void RDFCalculator::Worker::DoBonded(Topology *top) {
+void RDFCalculator::Worker::DoBonded(CSG_Topology *top) {
   for (list<Property *>::iterator iter = _rdfcalculator->_bonded.begin();
        iter != _rdfcalculator->_bonded.end(); ++iter) {
     string name = (*iter)->get("name").value();
