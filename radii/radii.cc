@@ -74,6 +74,7 @@ void CsgTestApp::EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref) {
     // Number of beads in the molecule
     int N = mol->BeadCount();
     vector<int> bead_ids = mol->getBeadIds();
+    sort(bead_ids.begin(),bead_ids.end());
     // sqared tensor of gyration for current snapshot
     double r_gyr_sq = 0;
     // inverse hydrodynamic radius for current snapshot

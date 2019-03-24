@@ -175,6 +175,7 @@ int main(int argc, char **argv) {
       for ( int & molecule_id : molecule_ids ){
         Molecule * mol = top.getMolecule(molecule_id);
         vector<int> bead_ids = mol->getBeadIds();
+        sort(bead_ids.begin(),bead_ids.end());
         for( int & bead_id : bead_ids ){
           flag_found = 0;
           part_type = atoi(top.getBead(bead_id)->getType().c_str());

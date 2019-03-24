@@ -181,6 +181,7 @@ class CGOrderParam : public CsgApplication {
     vec u, v, w;
 
     vector<int> bead_ids = conf->getBeadIds();
+    sort(bead_ids.begin(),bead_ids.end());
     if (_refmol != "") {
        for( int & bead_id : bead_ids ){
         Bead *bead = conf->getBead(bead_id);
@@ -197,13 +198,11 @@ class CGOrderParam : public CsgApplication {
 
       eR = bead->getPos() - _ref;
       if ((abs(eR) < _radialcutoff && abs(eR) > _minrad) || _rbins != 1) {
-        // cout << eR << endl;
         int rb = 0;
         if (_rbinw > 0) {
           rb = (int)((abs(eR)) / boxl * (double)_rbins);
         }
         if (rb >= _rbins) continue;
-        // cout << "rb " << rb << endl;
 
         eR.normalize();
         u = bead->getU();
@@ -217,7 +216,6 @@ class CGOrderParam : public CsgApplication {
         nv = (int)((((eR * v) + 1) / 2) * _nbin);
         nw = (int)((((eR * w) + 1) / 2) * _nbin);
 
-        // cout << "nu" << nu << "nv" << nv << "nw" << nw << endl;
         _hist_u[rb][nu] += 1;
         _hist_v[rb][nv] += 1;
         _hist_w[rb][nw] += 1;

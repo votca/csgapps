@@ -173,6 +173,7 @@ void CsgFluctuations::EvalConfiguration(CSG_Topology *conf,
                                         CSG_Topology *conf_atom = 0) {
 
   vector<int> bead_ids = conf->getBeadIds();
+  sort(bead_ids.begin(),bead_ids.end());
   if (_refmol != "") {
     for( int & bead_id : bead_ids){
       Bead *bead = conf->getBead(bead_id);
@@ -191,7 +192,6 @@ void CsgFluctuations::EvalConfiguration(CSG_Topology *conf,
   double r = 0;
   int rbin = 0;
   for(int & bead_id : bead_ids ){
-    //Bead *bead = *iter;
     Bead * bead = conf->getBead(bead_id);
     if (!wildcmp(_filter.c_str(), bead->getType().c_str())) continue;
 
