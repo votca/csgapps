@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 The VOTCA Development Team (http://www.votca.org)
+ * Copyright 2009-2019 The VOTCA Development Team (http://www.votca.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -263,9 +263,6 @@ int main(int argc, char **argv) {
       if (moreframes && frame_id >= first_frame && not_the_last) {
         ++analyzed_frames;
         // Loop over each atom property
-       // for (mol = top.Molecules().begin(); mol != top.Molecules().end();
-        //     ++mol) {
-         // for (int i = 0; i < (*mol)->BeadCount(); ++i) {
         vector<int> molecule_ids = top.getMoleculeIds();
         for ( int & molecule_id : molecule_ids ){
           Molecule * mol = top.getMolecule(molecule_id);
