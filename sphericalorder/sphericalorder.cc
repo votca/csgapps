@@ -181,9 +181,9 @@ class CGOrderParam : public CsgApplication {
     vec u, v, w;
 
     vector<int> bead_ids = conf->getBeadIds();
-    sort(bead_ids.begin(),bead_ids.end());
+    sort(bead_ids.begin(), bead_ids.end());
     if (_refmol != "") {
-       for( int & bead_id : bead_ids ){
+      for (int &bead_id : bead_ids) {
         Bead *bead = conf->getBead(bead_id);
         if (wildcmp(_refmol.c_str(), bead->getType().c_str())) {
           _ref = bead->getPos();
@@ -191,7 +191,7 @@ class CGOrderParam : public CsgApplication {
       }
     }
 
-    for( int & bead_id : bead_ids ){
+    for (int &bead_id : bead_ids) {
       Bead *bead = conf->getBead(bead_id);
       if (!wildcmp(_filter.c_str(), bead->getType().c_str())) continue;
       if (wildcmp(_refmol.c_str(), bead->getType().c_str())) continue;

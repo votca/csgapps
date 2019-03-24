@@ -20,10 +20,10 @@
 
 #include <votca/csg/beadlist.h>
 #include <votca/csg/csgapplication.h>
+#include <votca/csg/csgtopology.h>
 #include <votca/csg/molecule.h>
 #include <votca/csg/nblist.h>
 #include <votca/csg/nblistgrid.h>
-#include <votca/csg/csgtopology.h>
 #include <votca/tools/histogramnew.h>
 #include <votca/tools/types.h>
 
@@ -168,14 +168,14 @@ void MyWorker::EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref) {
 
   // loop over all molecules
   vector<int> molecule_ids = top->getMoleculeIds();
-  for ( int & molecule_id : molecule_ids){
+  for (int &molecule_id : molecule_ids) {
     Molecule *mol_src = top->getMolecule(molecule_id);
     // create a molecule in mapped topology
-    Molecule *mol = mapped.CreateMolecule(molecule_id,mol_src->getType());
+    Molecule *mol = mapped.CreateMolecule(molecule_id, mol_src->getType());
     vector<int> bead_ids = mol->getBeadIds();
     // Sorted so that they are placed in the order that they were added to the
     // molecule hopefully
-    sort(bead_ids.begin(),bead_ids.end());
+    sort(bead_ids.begin(), bead_ids.end());
     // loop over beads in molecule
     for (int index = 0; index < (static_cast<int>(bead_ids.size()) - 1);
          ++index) {
@@ -183,18 +183,18 @@ void MyWorker::EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref) {
       string cg_bead_type = "A";
       int cg_bead_id = mapped.BeadCount();
 
-      Bead *b = mapped.CreateBead(3, cg_bead_type,cg_bead_id,molecule_id,
-          topology_constants::unassigned_residue_id,
-          topology_constants::unassigned_residue_type,
-          topology_constants::unassigned_element,
-          0.0, 0.0);
+      Bead *b =
+          mapped.CreateBead(3, cg_bead_type, cg_bead_id, molecule_id,
+                            topology_constants::unassigned_residue_id,
+                            topology_constants::unassigned_residue_type,
+                            topology_constants::unassigned_element, 0.0, 0.0);
 
       int bead_id1 = bead_ids.at(index);
       int bead_id2 = bead_ids.at(index + 1);
       vec p1 = mol_src->getBead(bead_id1)->getPos();
       vec p2 = mol_src->getBead(bead_id2)->getPos();
       // position is in middle of bond, This only makes sense if the bonded
-      // beads are right nex to each other. 
+      // beads are right nex to each other.
       vec pos = 0.5 * (p1 + p2);
       // orientation pointing along bond
       vec v = p2 - p1;

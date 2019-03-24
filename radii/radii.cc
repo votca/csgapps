@@ -59,8 +59,8 @@ int main(int argc, char **argv) {
 
 void CsgTestApp::EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref) {
   // loop over all molecules
-  vector<int> molecule_ids = top->getMoleculeIds(); 
-  for ( int & molecule_id : molecule_ids ){
+  vector<int> molecule_ids = top->getMoleculeIds();
+  for (int &molecule_id : molecule_ids) {
     Molecule *mol = top->getMolecule(molecule_id);
     // does the id match if given?
     if (OptionsMap().count("mol")) {
@@ -74,7 +74,7 @@ void CsgTestApp::EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref) {
     // Number of beads in the molecule
     int N = mol->BeadCount();
     vector<int> bead_ids = mol->getBeadIds();
-    sort(bead_ids.begin(),bead_ids.end());
+    sort(bead_ids.begin(), bead_ids.end());
     // sqared tensor of gyration for current snapshot
     double r_gyr_sq = 0;
     // inverse hydrodynamic radius for current snapshot
@@ -86,7 +86,8 @@ void CsgTestApp::EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref) {
         int bead_id_i = bead_ids.at(i);
         int bead_id_j = bead_ids.at(j);
         // distance between bead i and j
-        vec r_ij = top->getBead(bead_id_i)->getPos() - top->getBead(bead_id_j)->getPos();
+        vec r_ij = top->getBead(bead_id_i)->getPos() -
+                   top->getBead(bead_id_j)->getPos();
         // radius of gyration squared
         r_gyr_sq += r_ij * r_ij / (double)(N * N);
         // hydrodynamic radius
@@ -102,14 +103,14 @@ void CsgTestApp::EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref) {
     // first calculate mass + center of mass
     double M = 0;
     vec cm(0, 0, 0);
-    for(int & bead_id : bead_ids){
+    for (int &bead_id : bead_ids) {
       M += top->getBead(bead_id)->getMass();
       cm += top->getBead(bead_id)->getPos() * top->getBead(bead_id)->getMass();
     }
     cm /= M;
     // now tensor of gyration based on cm
     double r_gyr_m_sq = 0;
-    for(int & bead_id : bead_ids ){
+    for (int &bead_id : bead_ids) {
       vec r_ij = top->getBead(bead_id)->getPos() - cm;
       r_gyr_m_sq += top->getBead(bead_id)->getMass() * (r_ij * r_ij);
     }

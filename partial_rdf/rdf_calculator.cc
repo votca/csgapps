@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2018 The VOTCA Development Team (http://www.votca.org)
+ * Copyright 2009-2019 The VOTCA Development Team (http://www.votca.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -325,9 +325,11 @@ void RDFCalculator::Worker::DoBonded(CSG_Topology *top) {
     std::list<Interaction *>::iterator ic_iter;
     for (ic_iter = list.begin(); ic_iter != list.end(); ++ic_iter) {
       Interaction *ic = *ic_iter;
-      //double v = ic->EvaluateVar(*top);
-      unordered_map<int, const vec *> bead_positions = top->getBeadPositions(ic->getBeadIds());
-      double v = ic->EvaluateVar(*(top->getBoundaryCondition()),bead_positions);
+      // double v = ic->EvaluateVar(*top);
+      unordered_map<int, const vec *> bead_positions =
+          top->getBeadPositions(ic->getBeadIds());
+      double v =
+          ic->EvaluateVar(*(top->getBoundaryCondition()), bead_positions);
       _current_hists[i._index].Process(v);
     }
   }

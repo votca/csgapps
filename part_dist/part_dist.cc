@@ -172,11 +172,11 @@ int main(int argc, char **argv) {
     } else {
       // Include all particle types
       vector<int> molecule_ids = top.getMoleculeIds();
-      for ( int & molecule_id : molecule_ids ){
-        Molecule * mol = top.getMolecule(molecule_id);
+      for (int &molecule_id : molecule_ids) {
+        Molecule *mol = top.getMolecule(molecule_id);
         vector<int> bead_ids = mol->getBeadIds();
-        sort(bead_ids.begin(),bead_ids.end());
-        for( int & bead_id : bead_ids ){
+        sort(bead_ids.begin(), bead_ids.end());
+        for (int &bead_id : bead_ids) {
           flag_found = 0;
           part_type = atoi(top.getBead(bead_id)->getType().c_str());
           for (size_t j = 0; j < ptypes.size(); ++j) {
@@ -197,10 +197,10 @@ int main(int argc, char **argv) {
     // ptypes)
     if (vm.count("shift_com")) {
       vector<int> molecule_ids = top.getMoleculeIds();
-      for ( int & molecule_id : molecule_ids ){
-        Molecule * mol = top.getMolecule(molecule_id);
+      for (int &molecule_id : molecule_ids) {
+        Molecule *mol = top.getMolecule(molecule_id);
         vector<int> bead_ids = mol->getBeadIds();
-        for( int & bead_id : bead_ids ){
+        for (int &bead_id : bead_ids) {
           part_type = atoi(top.getBead(bead_id)->getType().c_str());
           for (size_t j = 0; j < ptypes.size(); ++j)
             if (part_type == ptypes[j]) ++n_part;
@@ -238,11 +238,11 @@ int main(int argc, char **argv) {
       com = 0.;
       if (vm.count("shift_com")) {
         vector<int> molecule_ids = top.getMoleculeIds();
-        for ( int & molecule_id : molecule_ids ){
-          Molecule * mol = top.getMolecule(molecule_id);
+        for (int &molecule_id : molecule_ids) {
+          Molecule *mol = top.getMolecule(molecule_id);
           vector<int> bead_ids = mol->getBeadIds();
-          for( int & bead_id : bead_ids ){
-       
+          for (int &bead_id : bead_ids) {
+
             part_type = atoi(top.getBead(bead_id)->getType().c_str());
             for (size_t j = 0; j < ptypes.size(); ++j) {
               if (part_type == ptypes[j]) {
@@ -265,10 +265,10 @@ int main(int argc, char **argv) {
         ++analyzed_frames;
         // Loop over each atom property
         vector<int> molecule_ids = top.getMoleculeIds();
-        for ( int & molecule_id : molecule_ids ){
-          Molecule * mol = top.getMolecule(molecule_id);
+        for (int &molecule_id : molecule_ids) {
+          Molecule *mol = top.getMolecule(molecule_id);
           vector<int> bead_ids = mol->getBeadIds();
-          for( int & bead_id : bead_ids ){
+          for (int &bead_id : bead_ids) {
             part_type = atoi(top.getBead(bead_id)->getType().c_str());
             for (size_t j = 0; j < ptypes.size(); ++j) {
               if (part_type == ptypes[j]) {
