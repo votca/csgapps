@@ -304,12 +304,6 @@ void RDFCalculator::Worker::DoNonbonded(CSG_Topology *top) {
     i._avg_beadlist_1_count.Process(_cur_beadlist_1_count);
     i._avg_beadlist_2_count.Process(_cur_beadlist_2_count);
 
-    // process all pairs
-    /*NBList::iterator pair_iter;
-    for(pair_iter = nb->begin(); pair_iter!=nb->end();++pair_iter) {
-            _current_hists[i._index].Process((*pair_iter)->dist());
-    }*/
-
     delete nb;
   }
 }
@@ -331,7 +325,9 @@ void RDFCalculator::Worker::DoBonded(CSG_Topology *top) {
     std::list<Interaction *>::iterator ic_iter;
     for (ic_iter = list.begin(); ic_iter != list.end(); ++ic_iter) {
       Interaction *ic = *ic_iter;
-      double v = ic->EvaluateVar(*top);
+      //double v = ic->EvaluateVar(*top);
+      unordered_map<int, const vec *> bead_positions = top->getBeadPositions(ic->getBeadIds());
+      double v = ic->EvaluateVar(*(top->getBoundaryCondition()),bead_positions);
       _current_hists[i._index].Process(v);
     }
   }

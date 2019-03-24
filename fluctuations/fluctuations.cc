@@ -25,9 +25,9 @@
 #include <votca/tools/average.h>
 #include <votca/tools/tokenizer.h>
 
-// using namespace votca::tools;
 using namespace std;
 using namespace votca::csg;
+using namespace votca::tools;
 
 class CsgFluctuations : public CsgApplication {
   string ProgramName() { return "fluctuations"; }
@@ -171,15 +171,12 @@ int main(int argc, char **argv) {
 
 void CsgFluctuations::EvalConfiguration(CSG_Topology *conf,
                                         CSG_Topology *conf_atom = 0) {
-  vec eR;
-  double r = 0;
-  int rbin;
 
+  vector<int> bead_ids = conf->getBeadIds();
   if (_refmol != "") {
-    for (BeadContainer::iterator iter = conf->Beads().begin();
-         iter != conf->Beads().end(); ++iter) {
-      Bead *bead = *iter;
-      if (wildcmp(_refmol.c_str(), bead->getName().c_str())) {
+    for( int & bead_id : bead_ids){
+      Bead *bead = conf->getBead(bead_id);
+      if (wildcmp(_refmol.c_str(), bead->getType().c_str())) {
         _ref = bead->getPos();
         cout << " Solute pos " << _ref << endl;
       }
@@ -191,16 +188,18 @@ void CsgFluctuations::EvalConfiguration(CSG_Topology *conf,
   }
 
   /* check how many molecules are in each bin*/
-  for (BeadContainer::iterator iter = conf->Beads().begin();
-       iter != conf->Beads().end(); ++iter) {
-    Bead *bead = *iter;
-    if (!wildcmp(_filter.c_str(), bead->getName().c_str())) continue;
+  double r = 0;
+  int rbin = 0;
+  for(int & bead_id : bead_ids ){
+    //Bead *bead = *iter;
+    Bead * bead = conf->getBead(bead_id);
+    if (!wildcmp(_filter.c_str(), bead->getType().c_str())) continue;
 
     if (_do_spherical) {
-      eR = bead->getPos() - _ref;
+      vec eR = bead->getPos() - _ref;
       r = abs(eR);
     } else {
-      eR = bead->getPos();
+      vec eR = bead->getPos();
       if (_dim == 0)
         r = eR.getX();
       else if (_dim == 1)

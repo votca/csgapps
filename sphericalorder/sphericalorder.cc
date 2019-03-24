@@ -29,6 +29,7 @@
 
 using namespace std;
 using namespace votca::csg;
+using namespace votca::tools;
 
 class CGOrderParam : public CsgApplication {
  public:
@@ -179,22 +180,20 @@ class CGOrderParam : public CsgApplication {
     int nu, nv, nw;
     vec u, v, w;
 
+    vector<int> bead_ids = conf->getBeadIds();
     if (_refmol != "") {
-      for (BeadContainer::iterator iter = conf->Beads().begin();
-           iter != conf->Beads().end(); ++iter) {
-        Bead *bead = *iter;
-        if (wildcmp(_refmol.c_str(), bead->getName().c_str())) {
+       for( int & bead_id : bead_ids ){
+        Bead *bead = conf->getBead(bead_id);
+        if (wildcmp(_refmol.c_str(), bead->getType().c_str())) {
           _ref = bead->getPos();
-          // cout << " Solute pos " << _ref << endl;
         }
       }
     }
 
-    for (BeadContainer::iterator iter = conf->Beads().begin();
-         iter != conf->Beads().end(); ++iter) {
-      Bead *bead = *iter;
-      if (!wildcmp(_filter.c_str(), bead->getName().c_str())) continue;
-      if (wildcmp(_refmol.c_str(), bead->getName().c_str())) continue;
+    for( int & bead_id : bead_ids ){
+      Bead *bead = conf->getBead(bead_id);
+      if (!wildcmp(_filter.c_str(), bead->getType().c_str())) continue;
+      if (wildcmp(_refmol.c_str(), bead->getType().c_str())) continue;
 
       eR = bead->getPos() - _ref;
       if ((abs(eR) < _radialcutoff && abs(eR) > _minrad) || _rbins != 1) {

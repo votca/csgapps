@@ -67,7 +67,6 @@ int main(int argc, char **argv) {
       **p_occ = NULL, n_part(0), frame_id(0), analyzed_frames(0);
   bool moreframes(1), not_the_last(1);
 
-  MoleculeContainer::iterator mol;
   // Load topology+trajectory formats
   TopologyReader::RegisterPlugins();
   TrajectoryReader::RegisterPlugins();
@@ -172,10 +171,13 @@ int main(int argc, char **argv) {
 
     } else {
       // Include all particle types
-      for (mol = top.Molecules().begin(); mol != top.Molecules().end(); ++mol) {
-        for (int i = 0; i < (*mol)->BeadCount(); ++i) {
+      vector<int> molecule_ids = top.getMoleculeIds();
+      for ( int & molecule_id : molecule_ids ){
+        Molecule * mol = top.getMolecule(molecule_id);
+        vector<int> bead_ids = mol->getBeadIds();
+        for( int & bead_id : bead_ids ){
           flag_found = 0;
-          part_type = atoi((*mol)->getBead(i)->getType().c_str());
+          part_type = atoi(top.getBead(bead_id)->getType().c_str());
           for (size_t j = 0; j < ptypes.size(); ++j) {
             if (part_type == ptypes[j]) flag_found = 1;
           }
@@ -193,9 +195,12 @@ int main(int argc, char **argv) {
     // particles (only the ones that belong to the particle type index
     // ptypes)
     if (vm.count("shift_com")) {
-      for (mol = top.Molecules().begin(); mol != top.Molecules().end(); ++mol) {
-        for (int i = 0; i < (*mol)->BeadCount(); ++i) {
-          part_type = atoi((*mol)->getBead(i)->getType().c_str());
+      vector<int> molecule_ids = top.getMoleculeIds();
+      for ( int & molecule_id : molecule_ids ){
+        Molecule * mol = top.getMolecule(molecule_id);
+        vector<int> bead_ids = mol->getBeadIds();
+        for( int & bead_id : bead_ids ){
+          part_type = atoi(top.getBead(bead_id)->getType().c_str());
           for (size_t j = 0; j < ptypes.size(); ++j)
             if (part_type == ptypes[j]) ++n_part;
         }
@@ -231,18 +236,21 @@ int main(int argc, char **argv) {
       // Calculate new center of mass position in the direction of 'coordinate'
       com = 0.;
       if (vm.count("shift_com")) {
-        for (mol = top.Molecules().begin(); mol != top.Molecules().end();
-             ++mol) {
-          for (int i = 0; i < (*mol)->BeadCount(); ++i) {
-            part_type = atoi((*mol)->getBead(i)->getType().c_str());
+        vector<int> molecule_ids = top.getMoleculeIds();
+        for ( int & molecule_id : molecule_ids ){
+          Molecule * mol = top.getMolecule(molecule_id);
+          vector<int> bead_ids = mol->getBeadIds();
+          for( int & bead_id : bead_ids ){
+       
+            part_type = atoi(top.getBead(bead_id)->getType().c_str());
             for (size_t j = 0; j < ptypes.size(); ++j) {
               if (part_type == ptypes[j]) {
                 if (coordinate.compare("x") == 0) {
-                  com += (*mol)->getBead(i)->getPos().getX();
+                  com += top.getBead(bead_id)->getPos().getX();
                 } else if (coordinate.compare("y") == 0) {
-                  com += (*mol)->getBead(i)->getPos().getY();
+                  com += top.getBead(bead_id)->getPos().getY();
                 } else {
-                  com += (*mol)->getBead(i)->getPos().getZ();
+                  com += top.getBead(bead_id)->getPos().getZ();
                 }
               }
             }
@@ -255,18 +263,23 @@ int main(int argc, char **argv) {
       if (moreframes && frame_id >= first_frame && not_the_last) {
         ++analyzed_frames;
         // Loop over each atom property
-        for (mol = top.Molecules().begin(); mol != top.Molecules().end();
-             ++mol) {
-          for (int i = 0; i < (*mol)->BeadCount(); ++i) {
-            part_type = atoi((*mol)->getBead(i)->getType().c_str());
+       // for (mol = top.Molecules().begin(); mol != top.Molecules().end();
+        //     ++mol) {
+         // for (int i = 0; i < (*mol)->BeadCount(); ++i) {
+        vector<int> molecule_ids = top.getMoleculeIds();
+        for ( int & molecule_id : molecule_ids ){
+          Molecule * mol = top.getMolecule(molecule_id);
+          vector<int> bead_ids = mol->getBeadIds();
+          for( int & bead_id : bead_ids ){
+            part_type = atoi(top.getBead(bead_id)->getType().c_str());
             for (size_t j = 0; j < ptypes.size(); ++j) {
               if (part_type == ptypes[j]) {
                 if (coordinate.compare("x") == 0)
-                  coord = (*mol)->getBead(i)->getPos().getX();
+                  coord = top.getBead(bead_id)->getPos().getX();
                 else if (coordinate.compare("y") == 0)
-                  coord = (*mol)->getBead(i)->getPos().getY();
+                  coord = top.getBead(bead_id)->getPos().getY();
                 else
-                  coord = (*mol)->getBead(i)->getPos().getZ();
+                  coord = top.getBead(bead_id)->getPos().getZ();
 
                 if (coord - com > min && coord - com < max)
                   ++p_occ[j][(int)floor((coord - com - min) / step)];

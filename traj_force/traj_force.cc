@@ -25,6 +25,9 @@
 #include <votca/csg/beadlist.h>
 #include <votca/tools/linalg.h>
 #include <votca/tools/table.h>
+#include <votca/tools/vec.h>
+
+using namespace votca::tools;
 
 int main(int argc, char **argv) {
   TrajForce app;
@@ -53,7 +56,7 @@ bool TrajForce::EvaluateOptions() {
 }
 
 void TrajForce::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom) {
-  _top_force.CopyTopologyData(top);
+  _top_force.Copy(*top);
   _trjreader_force =
       TrjReaderFactory().Create(_op_vm["trj-force"].as<string>());
   if (_trjreader_force == NULL)

@@ -24,6 +24,7 @@
 
 using namespace std;
 using namespace votca::csg;
+using namespace votca::tools;
 
 class OrientCorrApp : public CsgApplication {
 
@@ -161,19 +162,23 @@ void MyWorker::EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref) {
   mapped.setBox(top->getBox());
 
   // loop over all molecules
-  for (MoleculeContainer::iterator iter = top->Molecules().begin();
-       iter != top->Molecules().end(); ++iter) {
-    Molecule *mol_src = *iter;
+  vector<int> molecule_ids = top->getMoleculeIds();
+  for ( int & molecule_id : molecule_ids){
+    Molecule *mol_src = top->getMolecule(molecule_id);
     // create a molecule in mapped topology
-    Molecule *mol = mapped.CreateMolecule(mol_src->getName());
+    Molecule *mol = mapped.CreateMolecule(molecule_id,mol_src->getType());
     // loop over beads in molecule
     for (int i = 0; i < mol_src->BeadCount() - 1; ++i) {
       // create a bead in mapped topology
       string bead_type = "A";
-      if (mapped.BeadTypeExist(bead_type) == false) {
-        mapped.RegisterBeadType(bead_type);
-      }
-      Bead *b = mapped.CreateBead(3, "A", bead_type, 1, 0.0, 0.0);
+      int bead_id = mapped.BeadCount();
+
+      Bead *b = mapped.CreateBead(3, bead_type,bead_id,molecule_id,
+          topology_constants::unassigned_residue_id,
+          topology_constants::unassigned_residue_type,
+          topology_constants::unassigned_element,
+          0.0, 0.0);
+
       vec p1 = mol_src->getBead(i)->getPos();
       vec p2 = mol_src->getBead(i + 1)->getPos();
       // position is in middle of bond
@@ -183,7 +188,7 @@ void MyWorker::EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref) {
       v.normalize();
       b->setPos(pos);
       b->setV(v);
-      mol->AddBead(b, "A");
+      mol->AddBead(b);
     }
   }
   cout << "done\n";
@@ -219,7 +224,7 @@ bool MyWorker::FoundPair(Bead *b1, Bead *b2, const vec &r, const double dist) {
   _cor.Process(dist, P2);
   _count.Process(dist);
 
-  if (b1->getMolecule() == b2->getMolecule()) return false;
+  if (b1->getMoleculeId() == b2->getMoleculeId()) return false;
 
   // calculate average with excluding intramolecular contributions
   _cor_excl.Process(dist, P2);
