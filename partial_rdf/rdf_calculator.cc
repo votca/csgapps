@@ -50,19 +50,18 @@ void RDFCalculator::Initialize() {
         "No interactions defined in options xml-file - nothing to be done");
 
   // initialize non-bonded structures
-  for (list<Property *>::iterator iter = _nonbonded.begin();
+  for (vector<Property *>::iterator iter = _nonbonded.begin();
        iter != _nonbonded.end(); ++iter) {
     interaction_t *i = AddInteraction(*iter);
     i->_is_bonded = false;
   }
 };
 
-void RDFCalculator::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom) {
-  matrix box;
-  box = top->getBox();
-  vec a = box.getCol(0);
-  vec b = box.getCol(1);
-  vec c = box.getCol(2);
+void RDFCalculator::BeginEvaluate(Topology *top, Topology *top_atom) {
+  Eigen::Matrix3d box = top->getBox();
+  Eigen::Vector3d a = box.col(0);
+  Eigen::Vector3d b = box.col(1);
+  Eigen::Vector3d c = box.col(2);
   _boxc = a / 2 + b / 2 + c / 2;
 
   cout << "Using center of box: " << _boxc << endl;
@@ -72,7 +71,7 @@ void RDFCalculator::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom) {
   _processed_some_frames = false;
 
   // initialize non-bonded structures
-  for (list<Property *>::iterator iter = _nonbonded.begin();
+  for (vector<Property *>::iterator iter = _nonbonded.begin();
        iter != _nonbonded.end(); ++iter) {
     string name = (*iter)->get("name").value();
 
@@ -85,13 +84,13 @@ void RDFCalculator::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom) {
     allbeads2.Generate(*top, (*iter)->get("type2").value());
 
     if (allbeads1.size() == 0)
-      throw std::runtime_error("CSG_Topology does not have beads of type \"" +
+      throw std::runtime_error("Topology does not have beads of type \"" +
                                (*iter)->get("type1").value() +
                                "\"\n"
                                "This was specified in type1 of interaction \"" +
                                name + "\"");
     if (allbeads2.size() == 0)
-      throw std::runtime_error("CSG_Topology does not have beads of type \"" +
+      throw std::runtime_error("Topology does not have beads of type \"" +
                                (*iter)->get("type2").value() +
                                "\"\n"
                                "This was specified in type2 of interaction \"" +
@@ -178,8 +177,8 @@ void RDFCalculator::LoadOptions(const string &file) {
 }
 
 // evaluate current conformation
-void RDFCalculator::Worker::EvalConfiguration(CSG_Topology *top,
-                                              CSG_Topology *top_atom) {
+void RDFCalculator::Worker::EvalConfiguration(Topology *top,
+                                              Topology *top_atom) {
   _cur_vol = 4.0 / 3.0 * M_PI * _rdfcalculator->_subvol_rad *
              _rdfcalculator->_subvol_rad * _rdfcalculator->_subvol_rad;
   // process non-bonded interactions
@@ -203,8 +202,8 @@ void RDFCalculator::ClearAverages() {
 
 class IMCNBSearchHandler {
  public:
-  IMCNBSearchHandler(HistogramNew *hist, double subvol_rad, vec boxc,
-                     bool do_vol_corr)
+  IMCNBSearchHandler(HistogramNew *hist, double subvol_rad,
+                     Eigen::Vector3d boxc, bool do_vol_corr)
       : _hist(hist),
         _subvol_rad(subvol_rad),
         _boxc(boxc),
@@ -212,13 +211,14 @@ class IMCNBSearchHandler {
 
   HistogramNew *_hist;
   double _subvol_rad;
-  vec _boxc;  // center of box
+  Eigen::Vector3d _boxc;  // center of box
   bool _do_vol_corr;
 
-  bool FoundPair(Bead *b1, Bead *b2, const vec &r, const double dist) {
+  bool FoundPair(Bead *b1, Bead *b2, const Eigen::Vector3d &r,
+                 const double dist) {
 
     if (_do_vol_corr) {
-      double dr = abs(b1->Pos() - _boxc);
+      double dr = (b1->Pos() - _boxc).norm();
       if (dist + dr > _subvol_rad)
         // 2.0 is because everything is normalized to 4 PI
         _hist->Process(dist, 2.0 / SurfaceRatio(dist, dr));
@@ -240,8 +240,8 @@ class IMCNBSearchHandler {
 };
 
 // process non-bonded interactions for current frame
-void RDFCalculator::Worker::DoNonbonded(CSG_Topology *top) {
-  for (list<Property *>::iterator iter = _rdfcalculator->_nonbonded.begin();
+void RDFCalculator::Worker::DoNonbonded(Topology *top) {
+  for (vector<Property *>::iterator iter = _rdfcalculator->_nonbonded.begin();
        iter != _rdfcalculator->_nonbonded.end(); ++iter) {
     string name = (*iter)->get("name").value();
 
@@ -309,8 +309,8 @@ void RDFCalculator::Worker::DoNonbonded(CSG_Topology *top) {
 }
 
 // process non-bonded interactions for current frame
-void RDFCalculator::Worker::DoBonded(CSG_Topology *top) {
-  for (list<Property *>::iterator iter = _rdfcalculator->_bonded.begin();
+void RDFCalculator::Worker::DoBonded(Topology *top) {
+  for (vector<Property *>::iterator iter = _rdfcalculator->_bonded.begin();
        iter != _rdfcalculator->_bonded.end(); ++iter) {
     string name = (*iter)->get("name").value();
 
@@ -326,7 +326,7 @@ void RDFCalculator::Worker::DoBonded(CSG_Topology *top) {
     for (ic_iter = list.begin(); ic_iter != list.end(); ++ic_iter) {
       Interaction *ic = *ic_iter;
       // double v = ic->EvaluateVar(*top);
-      unordered_map<int, const vec *> bead_positions =
+      unordered_map<int, const Eigen::Vector3d *> bead_positions =
           top->getBeadPositions(ic->getBeadIds());
       double v =
           ic->EvaluateVar(*(top->getBoundaryCondition()), bead_positions);

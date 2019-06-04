@@ -72,7 +72,7 @@ class CGOrderParam : public CsgApplication {
   bool DoTrajectory() { return true; }
   bool DoMapping() { return true; }
 
-  void BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom) {
+  void BeginEvaluate(Topology *top, Topology *top_atom) {
 
     string filter;
 
@@ -100,11 +100,10 @@ class CGOrderParam : public CsgApplication {
 
     _n = 0;
 
-    matrix box;
-    box = top->getBox();
-    vec a = box.getCol(0);
-    vec b = box.getCol(1);
-    vec c = box.getCol(2);
+    Eigen::Matrix3d box = top->getBox();
+    Eigen::Vector3d a = box.col(0);
+    Eigen::Vector3d b = box.col(1);
+    Eigen::Vector3d c = box.col(2);
 
     if (_refmol == "") {
 
@@ -113,7 +112,7 @@ class CGOrderParam : public CsgApplication {
       cout << "Refernce is center of box " << _ref << endl;
     }
 
-    boxl = abs(a) / 2;
+    boxl = a.norm() / 2;
     if (_rbinw > 0) {
       _rbins = boxl / _rbinw + 1;
       cout << "radial bins " << _rbins << endl;
@@ -174,47 +173,47 @@ class CGOrderParam : public CsgApplication {
     _file_w.close();
   };
 
-  void EvalConfiguration(CSG_Topology *conf, CSG_Topology *conf_atom = 0) {
+  void EvalConfiguration(Topology *conf, Topology *conf_atom = 0) {
 
-    vec eR;
+    Eigen::Vector3d eR;
     int nu, nv, nw;
-    vec u, v, w;
+    Eigen::Vector3d u, v, w;
 
     vector<int> bead_ids = conf->getBeadIds();
     sort(bead_ids.begin(), bead_ids.end());
     if (_refmol != "") {
       for (int &bead_id : bead_ids) {
-        Bead *bead = conf->getBead(bead_id);
-        if (wildcmp(_refmol.c_str(), bead->getType().c_str())) {
-          _ref = bead->getPos();
+        Bead &bead = conf->getBead(bead_id);
+        if (wildcmp(_refmol.c_str(), bead.getType().c_str())) {
+          _ref = bead.getPos();
         }
       }
     }
 
     for (int &bead_id : bead_ids) {
-      Bead *bead = conf->getBead(bead_id);
-      if (!wildcmp(_filter.c_str(), bead->getType().c_str())) continue;
-      if (wildcmp(_refmol.c_str(), bead->getType().c_str())) continue;
+      Bead &bead = conf->getBead(bead_id);
+      if (!wildcmp(_filter.c_str(), bead.getType().c_str())) continue;
+      if (wildcmp(_refmol.c_str(), bead.getType().c_str())) continue;
 
-      eR = bead->getPos() - _ref;
-      if ((abs(eR) < _radialcutoff && abs(eR) > _minrad) || _rbins != 1) {
+      eR = bead.getPos() - _ref;
+      if ((eR.norm() < _radialcutoff && eR.norm() > _minrad) || _rbins != 1) {
         int rb = 0;
         if (_rbinw > 0) {
-          rb = (int)((abs(eR)) / boxl * (double)_rbins);
+          rb = (int)((eR.norm()) / boxl * (double)_rbins);
         }
         if (rb >= _rbins) continue;
 
         eR.normalize();
-        u = bead->getU();
-        v = bead->getV();
-        w = bead->getW();
+        u = bead.getU();
+        v = bead.getV();
+        w = bead.getW();
         u.normalize();
         v.normalize();
         w.normalize();
 
-        nu = (int)((((eR * u) + 1) / 2) * _nbin);
-        nv = (int)((((eR * v) + 1) / 2) * _nbin);
-        nw = (int)((((eR * w) + 1) / 2) * _nbin);
+        nu = (int)((((eR.dot(u)) + 1) / 2) * _nbin);
+        nv = (int)((((eR.dot(v)) + 1) / 2) * _nbin);
+        nw = (int)((((eR.dot(w)) + 1) / 2) * _nbin);
 
         _hist_u[rb][nu] += 1;
         _hist_v[rb][nv] += 1;
@@ -234,7 +233,7 @@ class CGOrderParam : public CsgApplication {
   ofstream _file;
   string _filename;
   int _n;
-  vec _ref;
+  Eigen::Vector3d _ref;
   ofstream _file_u;
   ofstream _file_v;
   ofstream _file_w;

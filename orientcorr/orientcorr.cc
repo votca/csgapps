@@ -20,10 +20,10 @@
 
 #include <votca/csg/beadlist.h>
 #include <votca/csg/csgapplication.h>
-#include <votca/csg/csgtopology.h>
 #include <votca/csg/molecule.h>
 #include <votca/csg/nblist.h>
 #include <votca/csg/nblistgrid.h>
+#include <votca/csg/topology.h>
 #include <votca/tools/histogramnew.h>
 #include <votca/tools/types.h>
 
@@ -57,7 +57,7 @@ class OrientCorrApp : public CsgApplication {
   bool SynchronizeThreads() { return false; }
 
   // called before groing through all frames
-  void BeginEvaluate(CSG_Topology *top, CSG_Topology *top_ref);
+  void BeginEvaluate(Topology *top, Topology *top_ref);
   // called after all frames were parsed
   void EndEvaluate();
 
@@ -88,10 +88,11 @@ class MyWorker : public CsgApplication::Worker {
   ~MyWorker(){};
 
   // evaluate the current frame
-  void EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref);
+  void EvalConfiguration(Topology *top, Topology *top_ref);
 
   // callback if neighborsearch finds a pair
-  bool FoundPair(Bead *b1, Bead *b2, const vec &r, const double dist);
+  bool FoundPair(Bead *b1, Bead *b2, const Eigen::Vector3d &r,
+                 const double dist);
 
   // accumulator of the 3/2*u(0)u(r) - 1/2
   HistogramNew _cor;
@@ -135,7 +136,7 @@ NBList *OrientCorrApp::CreateNBSearch() {
 }
 
 // initialize the histograms
-void OrientCorrApp::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_ref) {
+void OrientCorrApp::BeginEvaluate(Topology *top, Topology *top_ref) {
   _cor.Initialize(0, _cut_off, _nbins);
   _count.Initialize(0, _cut_off, _nbins);
   _cor_excl.Initialize(0, _cut_off, _nbins);
@@ -155,12 +156,12 @@ CsgApplication::Worker *OrientCorrApp::ForkWorker() {
 }
 
 // evaluates a frame
-void MyWorker::EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref) {
+void MyWorker::EvalConfiguration(Topology *top, Topology *top_ref) {
 
   // first genearate a mapped topology
   // the beads are sitting on the bonds and have an orientation which
   // is pointing along bond direction
-  CSG_Topology mapped;
+  Topology mapped;
   cout << "generating mapped topology...";
 
   // copy box size
@@ -169,10 +170,10 @@ void MyWorker::EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref) {
   // loop over all molecules
   vector<int> molecule_ids = top->getMoleculeIds();
   for (int &molecule_id : molecule_ids) {
-    Molecule *mol_src = top->getMolecule(molecule_id);
+    Molecule &mol_src = top->getMolecule(molecule_id);
     // create a molecule in mapped topology
-    Molecule *mol = mapped.CreateMolecule(molecule_id, mol_src->getType());
-    vector<int> bead_ids = mol->getBeadIds();
+    Molecule &mol = mapped.CreateMolecule(molecule_id, mol_src.getType());
+    vector<int> bead_ids = mol.getBeadIds();
     // Sorted so that they are placed in the order that they were added to the
     // molecule hopefully
     sort(bead_ids.begin(), bead_ids.end());
@@ -183,7 +184,7 @@ void MyWorker::EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref) {
       string cg_bead_type = "A";
       int cg_bead_id = mapped.BeadCount();
 
-      Bead *b =
+      Bead &b =
           mapped.CreateBead(3, cg_bead_type, cg_bead_id, molecule_id,
                             topology_constants::unassigned_residue_id,
                             topology_constants::unassigned_residue_type,
@@ -191,17 +192,17 @@ void MyWorker::EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref) {
 
       int bead_id1 = bead_ids.at(index);
       int bead_id2 = bead_ids.at(index + 1);
-      vec p1 = mol_src->getBead(bead_id1)->getPos();
-      vec p2 = mol_src->getBead(bead_id2)->getPos();
+      Eigen::Vector3d p1 = mol_src.getBead(bead_id1).getPos();
+      Eigen::Vector3d p2 = mol_src.getBead(bead_id2).getPos();
       // position is in middle of bond, This only makes sense if the bonded
       // beads are right nex to each other.
-      vec pos = 0.5 * (p1 + p2);
+      Eigen::Vector3d pos = 0.5 * (p1 + p2);
       // orientation pointing along bond
-      vec v = p2 - p1;
+      Eigen::Vector3d v = p2 - p1;
       v.normalize();
-      b->setPos(pos);
-      b->setV(v);
-      mol->AddBead(b);
+      b.setPos(pos);
+      b.setV(v);
+      mol.AddBead(b);
     }
   }
   cout << "done\n";
@@ -229,8 +230,10 @@ void MyWorker::EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref) {
 
 // process a pair, since return value is falsed, pairs are not cached which
 // saves a lot of memory for the big systems
-bool MyWorker::FoundPair(Bead *b1, Bead *b2, const vec &r, const double dist) {
-  double tmp = b1->getV() * b2->getV();
+bool MyWorker::FoundPair(Bead *b1, Bead *b2, const Eigen::Vector3d &r,
+                         const double dist) {
+  // double tmp = b1->getV() * b2->getV();
+  double tmp = b1->getV().dot(b2->getV());
   double P2 = 3. / 2. * tmp * tmp - 0.5;
 
   // calculate average without exclusions

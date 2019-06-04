@@ -77,7 +77,7 @@ class CsgFluctuations : public CsgApplication {
   bool DoTrajectory() { return true; }
   bool DoMapping() { return true; }
 
-  void BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom) {
+  void BeginEvaluate(Topology *top, Topology *top_atom) {
     _filter = OptionsMap()["filter"].as<string>();
     _refmol = OptionsMap()["refmol"].as<string>();
     _rmin = OptionsMap()["rmin"].as<double>();
@@ -124,11 +124,10 @@ class CsgFluctuations : public CsgApplication {
     }
 
     if (_refmol == "" && _do_spherical) {
-      matrix box;
-      box = top->getBox();
-      vec a = box.getCol(0);
-      vec b = box.getCol(1);
-      vec c = box.getCol(2);
+      Eigen::Matrix3d box = top->getBox();
+      Eigen::Vector3d a = box.col(0);
+      Eigen::Vector3d b = box.col(1);
+      Eigen::Vector3d c = box.col(2);
       _ref = (a + b + c) / 2;
 
       cout << "Refernce is center of box " << _ref << endl;
@@ -141,7 +140,7 @@ class CsgFluctuations : public CsgApplication {
   // write out results in EndEvaluate
   void EndEvaluate();
   // do calculation in this function
-  void EvalConfiguration(CSG_Topology *top, CSG_Topology *top_ref);
+  void EvalConfiguration(Topology *top, Topology *top_ref);
 
  protected:
   // number of particles in dV
@@ -154,7 +153,7 @@ class CsgFluctuations : public CsgApplication {
   string _refmol;
   double _rmax;
   double _rmin;
-  vec _ref;
+  Eigen::Vector3d _ref;
   int _nframes;
   string _outfilename;
   ofstream _outfile;
@@ -169,16 +168,16 @@ int main(int argc, char **argv) {
   return app.Exec(argc, argv);
 }
 
-void CsgFluctuations::EvalConfiguration(CSG_Topology *conf,
-                                        CSG_Topology *conf_atom = 0) {
+void CsgFluctuations::EvalConfiguration(Topology *conf,
+                                        Topology *conf_atom = 0) {
 
   vector<int> bead_ids = conf->getBeadIds();
   sort(bead_ids.begin(), bead_ids.end());
   if (_refmol != "") {
     for (int &bead_id : bead_ids) {
-      Bead *bead = conf->getBead(bead_id);
-      if (wildcmp(_refmol.c_str(), bead->getType().c_str())) {
-        _ref = bead->getPos();
+      Bead &bead = conf->getBead(bead_id);
+      if (wildcmp(_refmol.c_str(), bead.getType().c_str())) {
+        _ref = bead.getPos();
         cout << " Solute pos " << _ref << endl;
       }
     }
@@ -192,20 +191,20 @@ void CsgFluctuations::EvalConfiguration(CSG_Topology *conf,
   double r = 0;
   int rbin = 0;
   for (int &bead_id : bead_ids) {
-    Bead *bead = conf->getBead(bead_id);
-    if (!wildcmp(_filter.c_str(), bead->getType().c_str())) continue;
+    Bead &bead = conf->getBead(bead_id);
+    if (!wildcmp(_filter.c_str(), bead.getType().c_str())) continue;
 
     if (_do_spherical) {
-      vec eR = bead->getPos() - _ref;
-      r = abs(eR);
+      Eigen::Vector3d eR = bead.getPos() - _ref;
+      r = eR.norm();
     } else {
-      vec eR = bead->getPos();
+      Eigen::Vector3d eR = bead.getPos();
       if (_dim == 0)
-        r = eR.getX();
+        r = eR.x();
       else if (_dim == 1)
-        r = eR.getY();
+        r = eR.y();
       else if (_dim == 2)
-        r = eR.getZ();
+        r = eR.z();
     }
     if (r > _rmin && r < _rmax) {
       rbin = (int)_nbins * (double)((r - _rmin) / (_rmax - _rmin));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 The VOTCA Development Team (http://www.votca.org)
+ * Copyright 2009-2019 The VOTCA Development Team (http://www.votca.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@
 #include <votca/csg/beadlist.h>
 #include <votca/tools/linalg.h>
 #include <votca/tools/table.h>
-#include <votca/tools/vec.h>
 
 using namespace votca::tools;
 
@@ -55,7 +54,7 @@ bool TrajForce::EvaluateOptions() {
   return true;
 }
 
-void TrajForce::BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom) {
+void TrajForce::BeginEvaluate(Topology *top, Topology *top_atom) {
   _top_force.Copy(*top);
   _trjreader_force =
       TrjReaderFactory().Create(_op_vm["trj-force"].as<string>());
@@ -80,13 +79,11 @@ void TrajForce::EndEvaluate() {
   cout << "\nWe are done, thank you very much!" << endl;
   _trjreader_force->Close();
   _trjwriter->Close();
-  delete _trjreader_force;
-  delete _trjwriter;
 }
 
 void TrajForce::WriteOutFiles() {}
 
-void TrajForce::EvalConfiguration(CSG_Topology *conf, CSG_Topology *conf_atom) {
+void TrajForce::EvalConfiguration(Topology *conf, Topology *conf_atom) {
   if (conf->BeadCount() != _top_force.BeadCount())
     throw std::runtime_error(
         "number of beads in topology and reference force topology does not "
@@ -98,10 +95,11 @@ void TrajForce::EvalConfiguration(CSG_Topology *conf, CSG_Topology *conf_atom) {
     // Since "conf" topology Force is set to false
     // for now using _top_force to store resultant output forces
 
-    _top_force.getBead(i)->F() =
-        conf->getBead(i)->getF() + _scale * _top_force.getBead(i)->getF();
-    vec d = conf->getBead(i)->getPos() - _top_force.getBead(i)->getPos();
-    if (abs(d) > 1e-6)
+    _top_force.getBead(i).F() =
+        conf->getBead(i).getF() + _scale * _top_force.getBead(i).getF();
+    Eigen::Vector3d d =
+        conf->getBead(i).getPos() - _top_force.getBead(i).getPos();
+    if (d.norm() > 1e-6)
       throw std::runtime_error(
           "One or more bead positions in trajectory and reference force "
           "trajectory differ by more than 1e-6");

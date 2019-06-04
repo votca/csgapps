@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2011 The VOTCA Development Team (http://www.votca.org)
+ * Copyright 2009-2019 The VOTCA Development Team (http://www.votca.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
 #define _TRAJ_FORCE_H
 
 #include <boost/numeric/ublas/vector.hpp>
+#include <memory>
 #include <votca/csg/csgapplication.h>
 #include <votca/csg/trajectoryreader.h>
 #include <votca/csg/trajectorywriter.h>
@@ -45,11 +46,11 @@ class TrajForce : public CsgApplication {
   bool EvaluateOptions();
 
   /// \brief called before the first frame
-  void BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom);
+  void BeginEvaluate(Topology *top, Topology *top_atom);
   /// \brief called after the last frame
   void EndEvaluate();
   /// \brief called for each frame which is mapped
-  void EvalConfiguration(CSG_Topology *conf, CSG_Topology *conf_atom);
+  void EvalConfiguration(Topology *conf, Topology *conf_atom);
 
  protected:
   /// \brief Scaling of forces, +1 for addition and -1 for subtraction
@@ -58,9 +59,9 @@ class TrajForce : public CsgApplication {
   void WriteOutFiles();
 
   void OpenForcesTrajectory();
-  CSG_Topology _top_force;
-  TrajectoryReader *_trjreader_force;
-  TrajectoryWriter *_trjwriter;
+  Topology _top_force;
+  std::unique_ptr<TrajectoryReader> _trjreader_force;
+  std::unique_ptr<TrajectoryWriter> _trjwriter;
 };
 
 #endif /* _TRAJ_FORCE_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2018 The VOTCA Development Team (http://www.votca.org)
+ * Copyright 2009-2019 The VOTCA Development Team (http://www.votca.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ class RDFCalculator {
   void LoadOptions(const string &file);
 
   /// begin coarse graining a trajectory
-  void BeginEvaluate(CSG_Topology *top, CSG_Topology *top_atom);
+  void BeginEvaluate(Topology *top, Topology *top_atom);
 
   /// end coarse graining a trajectory
   void EndEvaluate();
@@ -116,13 +116,13 @@ class RDFCalculator {
   int _nframes;
   int _nblock;
   double _subvol_rad;
-  vec _boxc;  // center of box
+  Eigen::Vector3d _boxc;  // center of box
   bool _do_vol_corr;
 
   /// list of bonded interactions
-  list<Property *> _bonded;
+  vector<Property *> _bonded;
   /// list of non-bonded interactions
-  list<Property *> _nonbonded;
+  vector<Property *> _nonbonded;
 
   /// map ineteractionm-name to interaction
   map<string, interaction_t *> _interactions;
@@ -149,11 +149,11 @@ class RDFCalculator {
     double _cur_beadlist_2_count;
 
     /// evaluate current conformation
-    void EvalConfiguration(CSG_Topology *top, CSG_Topology *top_atom);
+    void EvalConfiguration(Topology *top, Topology *top_atom);
     /// process non-bonded interactions for given frame
-    void DoNonbonded(CSG_Topology *top);
+    void DoNonbonded(Topology *top);
     /// process bonded interactions for given frame
-    void DoBonded(CSG_Topology *top);
+    void DoBonded(Topology *top);
   };
   /// update the correlations after interations were processed
   void DoCorrelations(RDFCalculator::Worker *worker);
