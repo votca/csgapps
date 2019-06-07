@@ -88,8 +88,7 @@ void TrajForce::EvalConfiguration(Topology *conf, Topology *conf_atom) {
     throw std::runtime_error(
         "number of beads in topology and reference force topology does not "
         "match");
-  for (int i = 0; i < conf->BeadCount(); ++i) {
-    // conf->getBead(i)->F() += _scale*_top_force.getBead(i)->getF();
+  for (int i = 0; i < static_cast<int>(conf->BeadCount()); ++i) {
 
     // \todo check why "conf" HasForce() is false
     // Since "conf" topology Force is set to false
@@ -104,8 +103,6 @@ void TrajForce::EvalConfiguration(Topology *conf, Topology *conf_atom) {
           "One or more bead positions in trajectory and reference force "
           "trajectory differ by more than 1e-6");
   }
-  //  cout << conf->HasForce() << endl;
-  //  cout << _top_force.HasForce() << endl;
   _trjwriter->Write(&_top_force);
   _trjreader_force->NextFrame(_top_force);
 }
